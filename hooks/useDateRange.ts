@@ -15,14 +15,23 @@ export function useDateRange() {
   const selectDate = useCallback(
     (date: Date) => {
       setRange((prev) => {
-        // Nothing selected → set start
-        if (!prev.start) return { start: date, end: null };
-        // Start selected, no end → set end (or reset if same day)
+        // 1. Nothing selected or both selected (start new cycle)
+        if (!prev.start || (prev.start && prev.end)) {
+          return { start: date, end: null };
+        }
+        
+        // 2. Start selected, no end (set end or reset if 3rd state)
         if (prev.start && !prev.end) {
+          // If clicking same day as start, reset (optional but good for UX)
           if (isSameDay(date, prev.start)) return { start: null, end: null };
+          
+          // Ensure start is before end
+          if (date < prev.start) {
+            return { start: date, end: prev.start };
+          }
           return { start: prev.start, end: date };
         }
-        // Both selected → restart
+
         return { start: date, end: null };
       });
     },
