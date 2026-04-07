@@ -16,6 +16,9 @@
   --accent-900: #312e81;
   --accent-rgb: 99, 102, 241;
 
+  --x: 50vw;
+  --y: 50vh;
+
   --font-inter: "Inter", system-ui, sans-serif;
   --font-playfair: "Playfair Display", Georgia, serif;
 }
@@ -91,7 +94,7 @@ html {
 
 /* Custom Cursor Glow */
 .cursor-glow {
-  background: radial-gradient(
+  background-image: radial-gradient(
     800px circle at var(--x) var(--y),
     rgba(var(--accent-rgb), 0.12),
     transparent 40%
@@ -99,7 +102,7 @@ html {
 }
 
 .dark .cursor-glow {
-  background: radial-gradient(
+  background-image: radial-gradient(
     600px circle at var(--x) var(--y),
     rgba(var(--accent-rgb), 0.18),
     transparent 40%

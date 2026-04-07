@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getColorSync } from "colorthief";
 
 export function useDynamicTheme(imageUrl: string | null) {
   const [dominantColor, setDominantColor] = useState<[number, number, number] | null>(null);
@@ -15,10 +14,11 @@ export function useDynamicTheme(imageUrl: string | null) {
 
     const handleLoad = () => {
       try {
-        const color = getColorSync(img);
-        if (color) {
-          const rgb = color.array();
-          setDominantColor(rgb);
+        const ColorThief = require("colorthief");
+        const colorThief = new ColorThief();
+        const rgb = colorThief.getColor(img);
+        if (rgb && Array.isArray(rgb)) {
+          setDominantColor(rgb as [number, number, number]);
           
           // Update CSS variables for accent theme
           const [r, g, b] = rgb;
@@ -28,6 +28,7 @@ export function useDynamicTheme(imageUrl: string | null) {
           root.style.setProperty("--accent-400", `rgb(${Math.min(255, r + 30)}, ${Math.min(255, g + 30)}, ${Math.min(255, b + 30)})`);
           root.style.setProperty("--accent-100", `rgba(${r}, ${g}, ${b}, 0.1)`);
           root.style.setProperty("--accent-200", `rgba(${r}, ${g}, ${b}, 0.2)`);
+          root.style.setProperty("--accent-rgb", `${r}, ${g}, ${b}`);
         }
       } catch (err) {
         console.error("Failed to extract color:", err);
