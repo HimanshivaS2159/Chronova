@@ -13,6 +13,7 @@ import {
   isWithinInterval,
   isBefore,
   isAfter,
+  getWeek,
 } from "date-fns";
 
 export type CalendarDay = {
@@ -92,6 +93,24 @@ export function isRangeStart(date: Date, start: Date | null, end: Date | null): 
 export function isRangeEnd(date: Date, start: Date | null, end: Date | null): boolean {
   if (!start || !end) return false;
   return isSameDay(date, isBefore(start, end) ? end : start);
+}
+
+export type CalendarWeek = {
+  weekNumber: number;
+  days: CalendarDay[];
+};
+
+export function buildCalendarWeeks(viewDate: Date): CalendarWeek[] {
+  const days = buildCalendarDays(viewDate);
+  const weeks: CalendarWeek[] = [];
+  for (let i = 0; i < days.length; i += 7) {
+    const chunk = days.slice(i, i + 7);
+    weeks.push({
+      weekNumber: getWeek(chunk[0].date, { weekStartsOn: 1 }),
+      days: chunk,
+    });
+  }
+  return weeks;
 }
 
 export { isSameDay, isBefore, isAfter, format };

@@ -3,7 +3,7 @@
 import React, { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import DayCell from "./DayCell";
-import { buildCalendarDays } from "@/utils/dateHelpers";
+import { buildCalendarWeeks } from "@/utils/dateHelpers";
 import type { DateRange } from "@/hooks/useDateRange";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -14,7 +14,7 @@ interface CalendarGridProps {
   hoverDate: Date | null;
   onSelect: (date: Date) => void;
   onHover: (date: Date | null) => void;
-  direction: number; // -1 prev, 1 next
+  direction: number;
   isLoading?: boolean;
 }
 
@@ -33,7 +33,7 @@ export default function CalendarGrid({
   direction,
   isLoading,
 }: CalendarGridProps) {
-  const days = useMemo(() => buildCalendarDays(viewDate), [viewDate]);
+  const weeks = useMemo(() => buildCalendarWeeks(viewDate), [viewDate]);
 
   const variants = {
     enter: (dir: number) => ({
@@ -51,8 +51,9 @@ export default function CalendarGrid({
 
   return (
     <div className="w-full">
-      {/* Weekday headers */}
-      <div className="grid grid-cols-7 mb-2">
+      {/* Weekday headers — offset by 1 col for week numbers */}
+      <div className="grid grid-cols-[2rem_repeat(7,1fr)] mb-2">
+        <div /> {/* spacer for week number column */}
         {WEEKDAYS.map((d) => (
           <div
             key={d}
@@ -63,7 +64,7 @@ export default function CalendarGrid({
         ))}
       </div>
 
-      {/* Days grid with page-flip animation */}
+      {/* Weeks with week number column */}
       <AnimatePresence mode="wait" custom={direction}>
         <motion.div
           key={viewDate.toISOString()}
@@ -74,19 +75,37 @@ export default function CalendarGrid({
           exit="exit"
           transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
           style={{ perspective: 800 }}
-          className="grid grid-cols-7"
         >
           {isLoading
-            ? Array.from({ length: 35 }).map((_, i) => <SkeletonCell key={i} />)
-            : days.map((day) => (
-                <DayCell
-                  key={day.date.toISOString()}
-                  day={day}
-                  range={range}
-                  hoverDate={hoverDate}
-                  onSelect={onSelect}
-                  onHover={onHover}
-                />
+            ? Array.from({ length: 6 }).map((_, wi) => (
+                <div key={wi} className="grid grid-cols-[2rem_repeat(7,1fr)]">
+                  <div className="flex items-center justify-center h-10">
+                    <div className="w-5 h-3 rounded bg-slate-200 dark:bg-slate-700 animate-shimmer bg-[length:200%_100%]" />
+                  </div>
+                  {Array.from({ length: 7 }).map((_, di) => (
+                    <SkeletonCell key={di} />
+                  ))}
+                </div>
+              ))
+            : weeks.map((week) => (
+                <div key={week.weekNumber} className="grid grid-cols-[2rem_repeat(7,1fr)]">
+                  {/* Week number */}
+                  <div className="flex items-center justify-center h-10">
+                    <span className="text-[10px] font-semibold text-slate-300 dark:text-slate-600 select-none">
+                      {week.weekNumber}
+                    </span>
+                  </div>
+                  {week.days.map((day) => (
+                    <DayCell
+                      key={day.date.toISOString()}
+                      day={day}
+                      range={range}
+                      hoverDate={hoverDate}
+                      onSelect={onSelect}
+                      onHover={onHover}
+                    />
+                  ))}
+                </div>
               ))}
         </motion.div>
       </AnimatePresence>
