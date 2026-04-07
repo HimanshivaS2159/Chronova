@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CSS custom properties for accent color theming */
+:root {
+  --accent-50: #eef2ff;
+  --accent-100: #e0e7ff;
+  --accent-200: #c7d2fe;
+  --accent-300: #a5b4fc;
+  --accent-400: #818cf8;
+  --accent-500: #6366f1;
+  --accent-600: #4f46e5;
+  --accent-700: #4338ca;
+  --accent-800: #3730a3;
+  --accent-900: #312e81;
+
+  --font-inter: "Inter", system-ui, sans-serif;
+  --font-playfair: "Playfair Display", Georgia, serif;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.3);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.5);
+}
+
+/* Ripple keyframe (used inline via JS) */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+/* Shimmer keyframe */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Page flip perspective */
+.perspective-800 {
+  perspective: 800px;
+}
+
+/* Glass card utility */
+@layer components {
+  .glass-card {
+    @apply bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/40 dark:border-slate-700/40;
+  }
+
+  .btn-ghost {
+    @apply rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200
+      hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95;
+  }
+}
+
+/* Selection color */
+::selection {
+  background: rgba(99, 102, 241, 0.2);
+  color: inherit;
+}
+
+/* Focus ring override */
+*:focus-visible {
+  outline: 2px solid rgba(99, 102, 241, 0.6);
+  outline-offset: 2px;
+}
