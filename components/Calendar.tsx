@@ -11,6 +11,7 @@ import { useKeyboardNav } from "@/hooks/useKeyboardNav";
 import Header from "./Header";
 import CalendarGrid from "./CalendarGrid";
 import NotesPanel from "./NotesPanel";
+import HeroStats from "./HeroStats";
 
 // Hero images per month (Unsplash)
 const HERO_IMAGES = [
@@ -188,6 +189,9 @@ export default function Calendar() {
                 <div className="absolute top-0 right-0 w-32 h-full overflow-hidden pointer-events-none">
                   <div className="absolute top-0 right-0 w-48 h-full bg-gradient-to-l from-white/10 to-transparent -skew-x-12 origin-top-right" />
                 </div>
+
+                {/* Hero stats overlay */}
+                <HeroStats viewDate={viewDate} />
               </div>
 
               {/* Calendar section */}
