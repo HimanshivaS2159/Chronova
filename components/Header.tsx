@@ -2,9 +2,10 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Sun, Moon, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Sun, Moon, ChevronLeft, ChevronRight, X, CalendarCheck } from "lucide-react";
 import { cn } from "@/utils/cn";
 import { formatMonthYear, formatShortDate } from "@/utils/dateHelpers";
+import { isToday as dateFnsIsToday, isSameMonth } from "date-fns";
 import type { DateRange } from "@/hooks/useDateRange";
 
 interface HeaderProps {
@@ -13,6 +14,7 @@ interface HeaderProps {
   onToggleDark: () => void;
   onPrev: () => void;
   onNext: () => void;
+  onToday: () => void;
   range: DateRange;
   onClearRange: () => void;
 }
@@ -23,10 +25,12 @@ export default function Header({
   onToggleDark,
   onPrev,
   onNext,
+  onToday,
   range,
   onClearRange,
 }: HeaderProps) {
   const hasRange = range.start && range.end;
+  const isCurrentMonth = isSameMonth(viewDate, new Date());
 
   return (
     <div className="flex items-center justify-between px-6 py-4">
@@ -75,8 +79,8 @@ export default function Header({
         </button>
       </div>
 
-      {/* Right side: range badge + dark toggle */}
-      <div className="flex items-center gap-3">
+      {/* Right side: range badge + today + dark toggle */}
+      <div className="flex items-center gap-2">
         {hasRange && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -95,6 +99,26 @@ export default function Header({
               <X className="w-3.5 h-3.5" />
             </button>
           </motion.div>
+        )}
+
+        {/* Jump to today — only shown when not on current month */}
+        {!isCurrentMonth && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            onClick={onToday}
+            aria-label="Jump to today (T)"
+            title="Jump to today (T)"
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold",
+              "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400",
+              "border border-emerald-200 dark:border-emerald-700/50",
+              "hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-all duration-200 active:scale-95"
+            )}
+          >
+            <CalendarCheck className="w-3.5 h-3.5" />
+            Today
+          </motion.button>
         )}
 
         <button

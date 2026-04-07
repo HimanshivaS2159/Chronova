@@ -7,6 +7,7 @@ import { cn } from "@/utils/cn";
 import { formatMonthYear, nextMonth, prevMonth } from "@/utils/dateHelpers";
 import { useDateRange } from "@/hooks/useDateRange";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useKeyboardNav } from "@/hooks/useKeyboardNav";
 import Header from "./Header";
 import CalendarGrid from "./CalendarGrid";
 import NotesPanel from "./NotesPanel";
@@ -75,6 +76,25 @@ export default function Calendar() {
       setIsLoading(false);
     }, 300);
   }, []);
+
+  const goToday = useCallback(() => {
+    const today = new Date();
+    const current = viewDate;
+    if (
+      today.getMonth() !== current.getMonth() ||
+      today.getFullYear() !== current.getFullYear()
+    ) {
+      setDirection(today > current ? 1 : -1);
+      setIsLoading(true);
+      setImgLoaded(false);
+      setTimeout(() => {
+        setViewDate(today);
+        setIsLoading(false);
+      }, 300);
+    }
+  }, [viewDate]);
+
+  useKeyboardNav({ onPrev: goPrev, onNext: goNext, onToday: goToday });
 
   return (
     <div
@@ -178,6 +198,7 @@ export default function Calendar() {
                   onToggleDark={() => setIsDark((d) => !d)}
                   onPrev={goPrev}
                   onNext={goNext}
+                  onToday={goToday}
                   range={range}
                   onClearRange={clearRange}
                 />
