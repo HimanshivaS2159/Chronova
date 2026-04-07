@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useCallback, useRef } from "react";
+import React, { useCallback } from "react";
 import { cn } from "@/utils/cn";
 import { isRangeStart, isRangeEnd, isInRange, isSameDay } from "@/utils/dateHelpers";
 import type { CalendarDay } from "@/utils/dateHelpers";
 import type { DateRange } from "@/hooks/useDateRange";
+import Tooltip from "./Tooltip";
 
 interface DayCellProps {
   day: CalendarDay;
@@ -58,6 +59,43 @@ const DayCell = React.memo(function DayCell({
 
   const dayNum = date.getDate();
 
+  const cellButton = (
+    <button
+      onClick={handleClick}
+      onMouseEnter={() => onHover(date)}
+      onMouseLeave={() => onHover(null)}
+      aria-label={`${date.toDateString()}${holiday ? ` — ${holiday}` : ""}`}
+      aria-pressed={isStart || isEnd}
+      className={cn(
+        "relative overflow-hidden w-9 h-9 rounded-full flex items-center justify-center",
+        "text-sm font-medium transition-all duration-200 ease-out select-none",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500",
+        !isCurrentMonth && "text-slate-300 dark:text-slate-600",
+        isCurrentMonth && !isStart && !isEnd && !todayFlag && "text-slate-700 dark:text-slate-200",
+        isWeekend && isCurrentMonth && !isStart && !isEnd && "text-rose-500 dark:text-rose-400",
+        todayFlag && !isStart && !isEnd &&
+          "ring-2 ring-indigo-400 dark:ring-indigo-500 text-indigo-600 dark:text-indigo-300 font-bold",
+        (isStart || isEnd) &&
+          "bg-indigo-600 dark:bg-indigo-500 text-white shadow-day-hover scale-105",
+        isSelected && "bg-indigo-600 dark:bg-indigo-500 text-white shadow-day-hover",
+        isCurrentMonth &&
+          !isStart &&
+          !isEnd &&
+          "hover:bg-indigo-50 dark:hover:bg-indigo-900/40 hover:scale-110 hover:shadow-day"
+      )}
+    >
+      {dayNum}
+      {holiday && isCurrentMonth && (
+        <span
+          className={cn(
+            "absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full",
+            isStart || isEnd ? "bg-white" : "bg-amber-400"
+          )}
+        />
+      )}
+    </button>
+  );
+
   return (
     <div
       className={cn(
@@ -68,46 +106,11 @@ const DayCell = React.memo(function DayCell({
         (isStart || isEnd) && "bg-indigo-100/70 dark:bg-indigo-900/30"
       )}
     >
-      <button
-        onClick={handleClick}
-        onMouseEnter={() => onHover(date)}
-        onMouseLeave={() => onHover(null)}
-        aria-label={`${date.toDateString()}${holiday ? ` — ${holiday}` : ""}`}
-        aria-pressed={isStart || isEnd}
-        className={cn(
-          "relative overflow-hidden w-9 h-9 rounded-full flex items-center justify-center",
-          "text-sm font-medium transition-all duration-200 ease-out select-none",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500",
-          // Base
-          !isCurrentMonth && "text-slate-300 dark:text-slate-600",
-          isCurrentMonth && !isStart && !isEnd && !todayFlag && "text-slate-700 dark:text-slate-200",
-          isWeekend && isCurrentMonth && !isStart && !isEnd && "text-rose-500 dark:text-rose-400",
-          // Today
-          todayFlag && !isStart && !isEnd &&
-            "ring-2 ring-indigo-400 dark:ring-indigo-500 text-indigo-600 dark:text-indigo-300 font-bold",
-          // Selected / range endpoints
-          (isStart || isEnd) &&
-            "bg-indigo-600 dark:bg-indigo-500 text-white shadow-day-hover scale-105",
-          isSelected && "bg-indigo-600 dark:bg-indigo-500 text-white shadow-day-hover",
-          // Hover
-          isCurrentMonth &&
-            !isStart &&
-            !isEnd &&
-            "hover:bg-indigo-50 dark:hover:bg-indigo-900/40 hover:scale-110 hover:shadow-day"
-        )}
-      >
-        {dayNum}
-        {/* Holiday dot */}
-        {holiday && isCurrentMonth && (
-          <span
-            className={cn(
-              "absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full",
-              isStart || isEnd ? "bg-white" : "bg-amber-400"
-            )}
-            title={holiday}
-          />
-        )}
-      </button>
+      {holiday && isCurrentMonth ? (
+        <Tooltip content={holiday}>{cellButton}</Tooltip>
+      ) : (
+        cellButton
+      )}
     </div>
   );
 });
