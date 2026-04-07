@@ -74,10 +74,10 @@ const DayCell = React.memo(function DayCell({
         isCurrentMonth && !isStart && !isEnd && !todayFlag && "text-slate-700 dark:text-slate-200",
         isWeekend && isCurrentMonth && !isStart && !isEnd && "text-rose-500 dark:text-rose-400",
         todayFlag && !isStart && !isEnd &&
-          "ring-2 ring-indigo-400 dark:ring-indigo-500 text-indigo-600 dark:text-indigo-300 font-bold",
+          "ring-2 ring-indigo-400 dark:ring-indigo-500 text-indigo-600 dark:text-indigo-300 font-bold animate-[todayPulse_2s_ease-in-out_infinite]",
         (isStart || isEnd) &&
-          "bg-indigo-600 dark:bg-indigo-500 text-white shadow-day-hover scale-105",
-        isSelected && "bg-indigo-600 dark:bg-indigo-500 text-white shadow-day-hover",
+          "bg-gradient-to-br from-indigo-500 to-indigo-700 dark:from-indigo-400 dark:to-indigo-600 text-white shadow-day-hover scale-105",
+        isSelected && "bg-gradient-to-br from-indigo-500 to-indigo-700 dark:from-indigo-400 dark:to-indigo-600 text-white shadow-day-hover",
         isCurrentMonth &&
           !isStart &&
           !isEnd &&

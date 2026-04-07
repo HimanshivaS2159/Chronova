@@ -33,6 +33,7 @@ const config: Config = {
         "slide-up": "slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
         shimmer: "shimmer 1.5s infinite",
         ripple: "ripple 0.6s ease-out",
+        todayPulse: "todayPulse 2s ease-in-out infinite",
       },
       keyframes: {
         pageFlip: {
@@ -56,6 +57,10 @@ const config: Config = {
         ripple: {
           "0%": { transform: "scale(0)", opacity: "0.6" },
           "100%": { transform: "scale(2.5)", opacity: "0" },
+        },
+        todayPulse: {
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(99,102,241,0.4)" },
+          "50%": { boxShadow: "0 0 0 6px rgba(99,102,241,0)" },
         },
       },
       backdropBlur: {
