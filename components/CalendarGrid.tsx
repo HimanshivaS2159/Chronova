@@ -19,8 +19,8 @@ interface CalendarGridProps {
 }
 
 const SkeletonCell = () => (
-  <div className="flex items-center justify-center h-10">
-    <div className="w-9 h-9 rounded-full bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 animate-shimmer bg-[length:200%_100%]" />
+  <div className="flex items-center justify-center h-14 w-full">
+    <div className="w-12 h-12 rounded-xl bg-slate-200/50 dark:bg-slate-800/50 animate-shimmer bg-[length:200%_100%]" />
   </div>
 );
 
@@ -37,34 +37,51 @@ export default function CalendarGrid({
 
   const variants = {
     enter: (dir: number) => ({
-      x: dir > 0 ? 60 : -60,
+      x: dir > 0 ? 100 : -100,
       opacity: 0,
-      rotateY: dir > 0 ? 8 : -8,
+      scale: 0.95,
+      rotateY: dir > 0 ? 25 : -25,
+      filter: "blur(10px)",
     }),
-    center: { x: 0, opacity: 1, rotateY: 0 },
+    center: {
+      x: 0,
+      opacity: 1,
+      scale: 1,
+      rotateY: 0,
+      filter: "blur(0px)",
+      transition: {
+        duration: 0.6,
+        ease: [0.16, 1, 0.3, 1], // Custom cubic-bezier for smooth inertia
+      },
+    },
     exit: (dir: number) => ({
-      x: dir > 0 ? -60 : 60,
+      x: dir > 0 ? -100 : 100,
       opacity: 0,
-      rotateY: dir > 0 ? -8 : 8,
+      scale: 0.95,
+      rotateY: dir > 0 ? -25 : 25,
+      filter: "blur(10px)",
+      transition: {
+        duration: 0.4,
+        ease: [0.16, 1, 0.3, 1],
+      },
     }),
   };
 
   return (
-    <div className="w-full">
-      {/* Weekday headers — offset by 1 col for week numbers */}
-      <div className="grid grid-cols-[2rem_repeat(7,1fr)] mb-2">
-        <div /> {/* spacer for week number column */}
+    <div className="w-full relative min-h-[400px]">
+      {/* Weekday headers */}
+      <div className="grid grid-cols-[3rem_repeat(7,1fr)] mb-4 lg:mb-6">
+        <div /> {/* Week number column spacer */}
         {WEEKDAYS.map((d) => (
           <div
             key={d}
-            className="text-center text-xs font-semibold tracking-widest uppercase text-slate-400 dark:text-slate-500 py-2"
+            className="text-center text-[10px] lg:text-xs font-bold tracking-[0.2em] uppercase text-slate-400 dark:text-slate-500 py-3"
           >
             {d}
           </div>
         ))}
       </div>
 
-      {/* Weeks with week number column */}
       <AnimatePresence mode="wait" custom={direction}>
         <motion.div
           key={viewDate.toISOString()}
@@ -73,14 +90,13 @@ export default function CalendarGrid({
           initial="enter"
           animate="center"
           exit="exit"
-          transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-          style={{ perspective: 800 }}
+          className="perspective-1000"
         >
           {isLoading
             ? Array.from({ length: 6 }).map((_, wi) => (
-                <div key={wi} className="grid grid-cols-[2rem_repeat(7,1fr)]">
-                  <div className="flex items-center justify-center h-10">
-                    <div className="w-5 h-3 rounded bg-slate-200 dark:bg-slate-700 animate-shimmer bg-[length:200%_100%]" />
+                <div key={wi} className="grid grid-cols-[3rem_repeat(7,1fr)] mb-1">
+                  <div className="flex items-center justify-center">
+                    <div className="w-6 h-4 rounded bg-slate-200/50 dark:bg-slate-800/50 animate-pulse" />
                   </div>
                   {Array.from({ length: 7 }).map((_, di) => (
                     <SkeletonCell key={di} />
@@ -88,13 +104,14 @@ export default function CalendarGrid({
                 </div>
               ))
             : weeks.map((week) => (
-                <div key={week.weekNumber} className="grid grid-cols-[2rem_repeat(7,1fr)]">
-                  {/* Week number */}
-                  <div className="flex items-center justify-center h-10">
-                    <span className="text-[10px] font-semibold text-slate-300 dark:text-slate-600 select-none">
+                <div key={week.weekNumber} className="grid grid-cols-[3rem_repeat(7,1fr)] mb-1">
+                  {/* Week number column */}
+                  <div className="flex items-center justify-center opacity-40">
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-600 tabular-nums">
                       {week.weekNumber}
                     </span>
                   </div>
+                  
                   {week.days.map((day) => (
                     <DayCell
                       key={day.date.toISOString()}
