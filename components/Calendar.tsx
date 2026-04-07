@@ -168,121 +168,127 @@ export default function Calendar() {
         <motion.div
           style={{ rotateX, rotateY, perspective: 2000 }}
           className={cn(
-            "w-full max-w-7xl rounded-[3rem] overflow-hidden glass-card",
-            "transition-all duration-500 ease-out preserve-3d",
-            "border border-white/20 dark:border-white/5 shadow-2xl"
+            "w-full max-w-7xl rounded-[3rem] overflow-hidden relative preserve-3d",
+            "transition-all duration-500 ease-out",
+            "border border-white/20 dark:border-white/5 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)]",
+            "antialiased subpixel-antialiased"
           )}
         >
-          {/* Spiral binding */}
-          <SpiralBinding />
+          {/* High-fidelity glass background layer (Separated from content to avoid 3D blur bug) */}
+          <div className="absolute inset-0 glass-card backdrop-blur-3xl pointer-events-none z-0" />
+          
+          <div className="relative z-10 w-full h-full flex flex-col">
+            {/* Spiral binding */}
+            <SpiralBinding />
 
-          {/* Layout: desktop = 3 cols, mobile = stacked */}
-          <div className="flex flex-col lg:flex-row min-h-[800px]">
-            {/* LEFT: Notes panel */}
-            <div className="lg:w-80 xl:w-[400px] p-6 lg:p-10 border-b lg:border-b-0 lg:border-r border-white/10 dark:border-white/5">
-              <NotesPanel
-                notes={notes}
-                onNotesChange={setNotes}
-                range={range}
-                monthLabel={formatMonthYear(viewDate)}
-              />
-            </div>
-
-            {/* CENTER + RIGHT */}
-            <div className="flex-1 flex flex-col bg-white/5 dark:bg-slate-900/10 backdrop-blur-md">
-              {/* Hero image with cinematic zoom */}
-              <div
-                ref={heroScrollRef}
-                className="relative h-[300px] md:h-[400px] lg:h-[450px] overflow-hidden group"
-              >
-                <div className="absolute inset-0 bg-slate-900" />
-                <motion.div
-                  style={{ x: heroParallaxX, y: heroParallaxY, translateY: scrollYBaseY }}
-                  className="absolute inset-0 scale-125 animate-cinematic-zoom"
-                >
-                  {!imgLoaded && (
-                    <div className="absolute inset-0 bg-slate-800 animate-shimmer" />
-                  )}
-                  <Image
-                    src={heroImage}
-                    alt={`${formatMonthYear(viewDate)} hero`}
-                    fill
-                    className={cn(
-                      "object-cover transition-opacity duration-1000",
-                      imgLoaded ? "opacity-70" : "opacity-0"
-                    )}
-                    onLoad={() => setImgLoaded(true)}
-                    priority
-                    sizes="(max-width: 1024px) 100vw, 75vw"
-                  />
-                </motion.div>
-
-                {/* Dark bottom fade */}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
-
-                {/* Tags */}
-                <div className="absolute top-8 left-8 flex gap-3">
-                  <div className="glass-tag animate-float">Atmospheric</div>
-                  <div className="glass-tag animate-float" style={{ animationDelay: "1.5s" }}>Living UI</div>
-                </div>
-
-                {/* Month label overlay */}
-                <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-12">
-                  <motion.div
-                    key={viewDate.toISOString()}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  >
-                    <p className="text-white/50 text-xs font-bold uppercase tracking-[0.4em] mb-3">
-                      {viewDate.getFullYear()} Selection
-                    </p>
-                    <h1 className="text-white text-6xl md:text-7xl lg:text-8xl font-black font-display tracking-tight drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]">
-                      {new Intl.DateTimeFormat("en", { month: "long" }).format(viewDate)}
-                    </h1>
-                  </motion.div>
-                </div>
-
-                {/* Hero stats overlay */}
-                <HeroStats viewDate={viewDate} />
+            {/* Layout: desktop = 3 cols, mobile = stacked */}
+            <div className="flex flex-col lg:flex-row min-h-[800px]">
+              {/* LEFT: Notes panel */}
+              <div className="lg:w-80 xl:w-[400px] p-6 lg:p-10 border-b lg:border-b-0 lg:border-r border-white/10 dark:border-white/5">
+                <NotesPanel
+                  notes={notes}
+                  onNotesChange={setNotes}
+                  range={range}
+                  monthLabel={formatMonthYear(viewDate)}
+                />
               </div>
 
-              {/* Calendar section */}
-              <div className="flex-1 p-6 lg:p-12 flex flex-col relative">
-                <Header
-                  viewDate={viewDate}
-                  isDark={isDark}
-                  onToggleDark={() => setIsDark((d) => !d)}
-                  onPrev={goPrev}
-                  onNext={goNext}
-                  onToday={goToday}
-                  range={range}
-                  onClearRange={clearRange}
-                />
+              {/* CENTER + RIGHT */}
+              <div className="flex-1 flex flex-col bg-white/5 dark:bg-slate-900/10">
+                {/* Hero image with cinematic zoom */}
+                <div
+                  ref={heroScrollRef}
+                  className="relative h-[300px] md:h-[400px] lg:h-[450px] overflow-hidden group"
+                >
+                  <div className="absolute inset-0 bg-slate-900" />
+                  <motion.div
+                    style={{ x: heroParallaxX, y: heroParallaxY, translateY: scrollYBaseY }}
+                    className="absolute inset-0 scale-125 animate-cinematic-zoom"
+                  >
+                    {!imgLoaded && (
+                      <div className="absolute inset-0 bg-slate-800 animate-shimmer" />
+                    )}
+                    <Image
+                      src={heroImage}
+                      alt={`${formatMonthYear(viewDate)} hero`}
+                      fill
+                      className={cn(
+                        "object-cover transition-opacity duration-1000 will-change-transform",
+                        imgLoaded ? "opacity-70" : "opacity-0"
+                      )}
+                      onLoad={() => setImgLoaded(true)}
+                      priority
+                      sizes="(max-width: 1024px) 100vw, 75vw"
+                    />
+                  </motion.div>
 
-                <div className="flex-1 px-4 pb-8 mt-8">
-                  <CalendarGrid
-                    viewDate={viewDate}
-                    range={range}
-                    hoverDate={hoverDate}
-                    onSelect={selectDate}
-                    onHover={setHoverDate}
-                    direction={direction}
-                    isLoading={isLoading}
-                    mouseX={mx}
-                    mouseY={my}
-                  />
+                  {/* Dark bottom fade */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
+
+                  {/* Tags */}
+                  <div className="absolute top-8 left-8 flex gap-3">
+                    <div className="glass-tag animate-float">Atmospheric</div>
+                    <div className="glass-tag animate-float" style={{ animationDelay: "1.5s" }}>Living UI</div>
+                  </div>
+
+                  {/* Month label overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-12">
+                    <motion.div
+                      key={viewDate.toISOString()}
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <p className="text-white/50 text-xs font-bold uppercase tracking-[0.4em] mb-3">
+                        {viewDate.getFullYear()} Selection
+                      </p>
+                      <h1 className="text-white text-6xl md:text-7xl lg:text-8xl font-black font-display tracking-tight drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]">
+                        {new Intl.DateTimeFormat("en", { month: "long" }).format(viewDate)}
+                      </h1>
+                    </motion.div>
+                  </div>
+
+                  {/* Hero stats overlay */}
+                  <HeroStats viewDate={viewDate} />
                 </div>
 
-                {/* Floating Context Preview */}
-                <FloatingPreview 
-                  isVisible={!!(range.start && range.end && notes)} 
-                  notes={notes} 
-                  monthLabel={formatMonthYear(viewDate)} 
-                />
+                {/* Calendar section */}
+                <div className="flex-1 p-6 lg:p-12 flex flex-col relative">
+                  <Header
+                    viewDate={viewDate}
+                    isDark={isDark}
+                    onToggleDark={() => setIsDark((d) => !d)}
+                    onPrev={goPrev}
+                    onNext={goNext}
+                    onToday={goToday}
+                    range={range}
+                    onClearRange={clearRange}
+                  />
 
-                {/* Legend */}
-                <Legend />
+                  <div className="flex-1 px-4 pb-8 mt-8">
+                    <CalendarGrid
+                      viewDate={viewDate}
+                      range={range}
+                      hoverDate={hoverDate}
+                      onSelect={selectDate}
+                      onHover={setHoverDate}
+                      direction={direction}
+                      isLoading={isLoading}
+                      mouseX={mx}
+                      mouseY={my}
+                    />
+                  </div>
+
+                  {/* Floating Context Preview */}
+                  <FloatingPreview 
+                    isVisible={!!(range.start && range.end && notes)} 
+                    notes={notes} 
+                    monthLabel={formatMonthYear(viewDate)} 
+                  />
+
+                  {/* Legend */}
+                  <Legend />
+                </div>
               </div>
             </div>
           </div>

@@ -50,7 +50,7 @@ export default function CalendarGrid({
       opacity: 1,
       scale: 1,
       rotateY: 0,
-      filter: "blur(0px)",
+      filter: "none",
       transition: {
         duration: 0.6,
         ease: [0.16, 1, 0.3, 1],
