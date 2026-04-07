@@ -2,7 +2,7 @@
 
 import React, { useCallback } from "react";
 import { motion } from "framer-motion";
-import { StickyNote, Trash2, CalendarRange } from "lucide-react";
+import { StickyNote, Trash2, CalendarRange, Download } from "lucide-react";
 import { cn } from "@/utils/cn";
 import { formatShortDate } from "@/utils/dateHelpers";
 import type { DateRange } from "@/hooks/useDateRange";
@@ -15,6 +15,7 @@ interface NotesPanelProps {
 }
 
 const LINE_COUNT = 12;
+const MAX_CHARS = 500;
 
 export default function NotesPanel({
   notes,
@@ -30,6 +31,28 @@ export default function NotesPanel({
       : null;
 
   const handleClear = useCallback(() => onNotesChange(""), [onNotesChange]);
+
+  const handleExport = useCallback(() => {
+    const content = [
+      `Chronova Notes — ${monthLabel}`,
+      rangeLabel ? `Range: ${rangeLabel}` : "",
+      "",
+      notes,
+    ]
+      .filter(Boolean)
+      .join("\n");
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `chronova-notes-${monthLabel.replace(/\s+/g, "-").toLowerCase()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [notes, monthLabel, rangeLabel]);
+
+  const charCount = notes.length;
+  const isNearLimit = charCount > MAX_CHARS * 0.8;
+  const isAtLimit = charCount >= MAX_CHARS;
 
   return (
     <motion.div
@@ -65,13 +88,24 @@ export default function NotesPanel({
           </div>
         </div>
         {notes && (
-          <button
-            onClick={handleClear}
-            aria-label="Clear notes"
-            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors duration-200"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-1">
+            {/* Export button */}
+            <button
+              onClick={handleExport}
+              aria-label="Export notes as text file"
+              title="Export notes"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors duration-200"
+            >
+              <Download className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleClear}
+              aria-label="Clear notes"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors duration-200"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
         )}
       </div>
 
@@ -102,9 +136,12 @@ export default function NotesPanel({
 
         <textarea
           value={notes}
-          onChange={(e) => onNotesChange(e.target.value)}
+          onChange={(e) => {
+            if (e.target.value.length <= MAX_CHARS) onNotesChange(e.target.value);
+          }}
           placeholder="Jot down your thoughts, plans, or reminders for this month..."
           aria-label="Monthly notes"
+          maxLength={MAX_CHARS}
           className={cn(
             "relative w-full h-full min-h-[200px] resize-none bg-transparent",
             "pl-10 pr-3 py-2 text-sm leading-[calc(100%/13*1.5)]",
@@ -113,6 +150,24 @@ export default function NotesPanel({
           )}
           style={{ lineHeight: `${100 / (LINE_COUNT + 1)}%` }}
         />
+
+        {/* Character count */}
+        {charCount > 0 && (
+          <div className="absolute bottom-2 right-2">
+            <span
+              className={cn(
+                "text-[10px] font-medium tabular-nums",
+                isAtLimit
+                  ? "text-rose-500"
+                  : isNearLimit
+                  ? "text-amber-500"
+                  : "text-slate-300 dark:text-slate-600"
+              )}
+            >
+              {charCount}/{MAX_CHARS}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Spiral holes decoration on left edge */}
