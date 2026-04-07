@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect, useRef, useMemo } from "react";
-import { motion, useScroll, useTransform, useSpring, useMotionValue } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring, useMotionValue, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { cn } from "@/utils/cn";
 import { formatMonthYear, nextMonth, prevMonth } from "@/utils/dateHelpers";
@@ -13,6 +13,7 @@ import Header from "./Header";
 import CalendarGrid from "./CalendarGrid";
 import NotesPanel from "./NotesPanel";
 import HeroStats from "./HeroStats";
+import FloatingPreview from "./FloatingPreview";
 
 const HERO_IMAGES = [
   "https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=1200&q=80", // Jan
@@ -54,21 +55,23 @@ export default function Calendar() {
 
   const [notes, setNotes] = useLocalStorage<string>(notesKey, "");
 
-  // Mouse Parallax & 3D Tilt Logic
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const mouseX = useSpring(x, { stiffness: 150, damping: 20 });
-  const mouseY = useSpring(y, { stiffness: 150, damping: 20 });
+  // Mouse Interaction Logic (Orchestration)
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const springX = useSpring(mx, { stiffness: 100, damping: 20 });
+  const springY = useSpring(my, { stiffness: 100, damping: 20 });
 
-  const rotateX = useTransform(mouseY, [-0.5, 0.5], [5, -5]);
-  const rotateY = useTransform(mouseX, [-0.5, 0.5], [-5, 5]);
+  const rotateX = useTransform(springY, [-500, 500], [7, -7]);
+  const rotateY = useTransform(springX, [-500, 500], [-7, 7]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-    x.set((e.clientX - centerX) / rect.width);
-    y.set((e.clientY - centerY) / rect.height);
+    
+    // Set relative coordinates for magnet/parallax
+    mx.set(e.clientX - centerX);
+    my.set(e.clientY - centerY);
     
     // Set custom cursor glow coordinates
     document.documentElement.style.setProperty("--x", `${e.clientX}px`);
@@ -76,17 +79,17 @@ export default function Calendar() {
   };
 
   const handleMouseLeave = () => {
-    x.set(0);
-    y.set(0);
+    mx.set(0);
+    my.set(0);
   };
 
   // Parallax for Hero
-  const heroParallaxX = useTransform(mouseX, [-0.5, 0.5], [-20, 20]);
-  const heroParallaxY = useTransform(mouseY, [-0.5, 0.5], [-20, 20]);
+  const heroParallaxX = useTransform(springX, [-500, 500], [-30, 30]);
+  const heroParallaxY = useTransform(springY, [-500, 500], [-30, 30]);
 
   const heroScrollRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroScrollRef, offset: ["start start", "end start"] });
-  const scrollYBaseY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const scrollYBaseY = useTransform(scrollYProgress, [0, 1], ["0%", "40%"]);
 
   // Dark mode
   useEffect(() => {
@@ -140,22 +143,23 @@ export default function Calendar() {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className={cn(
-        "min-h-screen transition-colors duration-700 cursor-glow",
-        "bg-gradient-to-br from-slate-50 via-slate-100 to-indigo-50",
-        "dark:from-slate-950 dark:via-slate-900 dark:to-slate-950"
+        "min-h-screen transition-colors duration-700 cursor-glow overflow-x-hidden",
+        "bg-slate-50 dark:bg-slate-950"
       )}
     >
+      <Particles count={25} />
+
       {/* Ambient background blobs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden>
         <motion.div 
           animate={{ x: [0, 50, 0], y: [0, 30, 0] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute top-[-10%] left-[-10%] w-[800px] h-[800px] rounded-full bg-accent-100 dark:bg-accent-900/10 blur-[120px]" 
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="absolute top-[-10%] left-[-10%] w-[1000px] h-[1000px] rounded-full bg-accent-500/5 dark:bg-accent-500/10 blur-[150px]" 
         />
         <motion.div 
           animate={{ x: [0, -40, 0], y: [0, -50, 0] }}
-          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-indigo-200/20 dark:bg-indigo-950/10 blur-[100px]" 
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute bottom-[-10%] right-[-10%] w-[800px] h-[800px] rounded-full bg-indigo-500/5 dark:bg-indigo-500/10 blur-[120px]" 
         />
       </div>
 
@@ -164,18 +168,18 @@ export default function Calendar() {
         <motion.div
           style={{ rotateX, rotateY, perspective: 2000 }}
           className={cn(
-            "w-full max-w-7xl rounded-[2.5rem] overflow-hidden glass-card",
+            "w-full max-w-7xl rounded-[3rem] overflow-hidden glass-card",
             "transition-all duration-500 ease-out preserve-3d",
-            "border border-white/60 dark:border-white/10"
+            "border border-white/20 dark:border-white/5 shadow-2xl"
           )}
         >
           {/* Spiral binding */}
           <SpiralBinding />
 
           {/* Layout: desktop = 3 cols, mobile = stacked */}
-          <div className="flex flex-col lg:flex-row min-h-[700px]">
+          <div className="flex flex-col lg:flex-row min-h-[800px]">
             {/* LEFT: Notes panel */}
-            <div className="lg:w-80 xl:w-96 p-6 lg:p-8 border-b lg:border-b-0 lg:border-r border-white/20 dark:border-white/5">
+            <div className="lg:w-80 xl:w-[400px] p-6 lg:p-10 border-b lg:border-b-0 lg:border-r border-white/10 dark:border-white/5">
               <NotesPanel
                 notes={notes}
                 onNotesChange={setNotes}
@@ -185,26 +189,27 @@ export default function Calendar() {
             </div>
 
             {/* CENTER + RIGHT */}
-            <div className="flex-1 flex flex-col bg-white/40 dark:bg-slate-900/20 backdrop-blur-sm">
-              {/* Hero image with parallax */}
+            <div className="flex-1 flex flex-col bg-white/5 dark:bg-slate-900/10 backdrop-blur-md">
+              {/* Hero image with cinematic zoom */}
               <div
                 ref={heroScrollRef}
-                className="relative h-64 md:h-80 lg:h-96 overflow-hidden group"
+                className="relative h-[300px] md:h-[400px] lg:h-[450px] overflow-hidden group"
               >
+                <div className="absolute inset-0 bg-slate-900" />
                 <motion.div
                   style={{ x: heroParallaxX, y: heroParallaxY, translateY: scrollYBaseY }}
-                  className="absolute inset-0 scale-125"
+                  className="absolute inset-0 scale-125 animate-cinematic-zoom"
                 >
                   {!imgLoaded && (
-                    <div className="absolute inset-0 bg-slate-200 dark:bg-slate-800 animate-shimmer bg-[length:200%_100%]" />
+                    <div className="absolute inset-0 bg-slate-800 animate-shimmer" />
                   )}
                   <Image
                     src={heroImage}
                     alt={`${formatMonthYear(viewDate)} hero`}
                     fill
                     className={cn(
-                      "object-cover transition-opacity duration-1000 ease-in-out group-hover:scale-110",
-                      imgLoaded ? "opacity-100" : "opacity-0"
+                      "object-cover transition-opacity duration-1000",
+                      imgLoaded ? "opacity-70" : "opacity-0"
                     )}
                     onLoad={() => setImgLoaded(true)}
                     priority
@@ -212,27 +217,27 @@ export default function Calendar() {
                   />
                 </motion.div>
 
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-black/30" />
+                {/* Dark bottom fade */}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
 
                 {/* Tags */}
-                <div className="absolute top-6 left-6 flex gap-2">
-                  <div className="glass-tag animate-float">Interactive</div>
-                  <div className="glass-tag animate-float" style={{ animationDelay: "1s" }}>Customizable</div>
+                <div className="absolute top-8 left-8 flex gap-3">
+                  <div className="glass-tag animate-float">Atmospheric</div>
+                  <div className="glass-tag animate-float" style={{ animationDelay: "1.5s" }}>Living UI</div>
                 </div>
 
                 {/* Month label overlay */}
                 <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-12">
                   <motion.div
                     key={viewDate.toISOString()}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                   >
-                    <p className="text-white/80 text-sm font-semibold uppercase tracking-[0.3em] mb-2">
-                      {viewDate.getFullYear()}
+                    <p className="text-white/50 text-xs font-bold uppercase tracking-[0.4em] mb-3">
+                      {viewDate.getFullYear()} Selection
                     </p>
-                    <h1 className="text-white text-5xl md:text-6xl lg:text-7xl font-bold font-display drop-shadow-2xl">
+                    <h1 className="text-white text-6xl md:text-7xl lg:text-8xl font-black font-display tracking-tight drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]">
                       {new Intl.DateTimeFormat("en", { month: "long" }).format(viewDate)}
                     </h1>
                   </motion.div>
@@ -243,7 +248,7 @@ export default function Calendar() {
               </div>
 
               {/* Calendar section */}
-              <div className="flex-1 p-6 lg:p-10 flex flex-col">
+              <div className="flex-1 p-6 lg:p-12 flex flex-col relative">
                 <Header
                   viewDate={viewDate}
                   isDark={isDark}
@@ -255,7 +260,7 @@ export default function Calendar() {
                   onClearRange={clearRange}
                 />
 
-                <div className="flex-1 px-2 pb-6 mt-4">
+                <div className="flex-1 px-4 pb-8 mt-8">
                   <CalendarGrid
                     viewDate={viewDate}
                     range={range}
@@ -264,8 +269,17 @@ export default function Calendar() {
                     onHover={setHoverDate}
                     direction={direction}
                     isLoading={isLoading}
+                    mouseX={mx}
+                    mouseY={my}
                   />
                 </div>
+
+                {/* Floating Context Preview */}
+                <FloatingPreview 
+                  isVisible={!!(range.start && range.end && notes)} 
+                  notes={notes} 
+                  monthLabel={formatMonthYear(viewDate)} 
+                />
 
                 {/* Legend */}
                 <Legend />
@@ -278,16 +292,56 @@ export default function Calendar() {
   );
 }
 
+function Particles({ count = 20 }: { count?: number }) {
+  const particles = useMemo(() => 
+    Array.from({ length: count }).map((_, i) => ({
+      id: i,
+      size: Math.random() * 4 + 2,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      delay: Math.random() * 5,
+      duration: Math.random() * 10 + 10,
+    })), [count]);
+
+  return (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+      {particles.map((p) => (
+        <motion.div
+          key={p.id}
+          className="particle"
+          style={{
+            width: p.size,
+            height: p.size,
+            left: p.left,
+            top: p.top,
+          }}
+          animate={{
+            y: [0, -100, 0],
+            x: [0, 50, 0],
+            opacity: [0, 0.4, 0],
+          }}
+          transition={{
+            duration: p.duration,
+            repeat: Infinity,
+            delay: p.delay,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 function SpiralBinding() {
   return (
     <div
-      className="relative flex items-center justify-center gap-6 py-4 px-8 bg-gradient-to-r from-slate-200 via-slate-50 to-slate-200 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 border-b border-white/20 dark:border-white/5"
+      className="relative flex items-center justify-center gap-6 py-5 px-10 bg-slate-100/10 dark:bg-slate-900/20 border-b border-white/10"
       aria-hidden
     >
-      {Array.from({ length: 22 }).map((_, i) => (
-        <div key={i} className="relative flex flex-col items-center gap-0.5">
-          <div className="w-5 h-4 rounded-t-full border-2 border-slate-400 dark:border-slate-500 border-b-0 bg-white/50 dark:bg-black/20" />
-          <div className="w-5 h-4 rounded-b-full border-2 border-slate-400 dark:border-slate-500 border-t-0 bg-white/50 dark:bg-black/20" />
+      {Array.from({ length: 20 }).map((_, i) => (
+        <div key={i} className="flex flex-col items-center gap-1 group">
+          <div className="w-4 h-6 rounded-full border-2 border-slate-400/30 dark:border-slate-600/30 bg-white/5" />
+          <div className="absolute top-4 w-1 h-8 bg-gradient-to-b from-slate-400/20 to-transparent dark:from-slate-600/20" />
         </div>
       ))}
     </div>
@@ -296,14 +350,14 @@ function SpiralBinding() {
 
 function Legend() {
   return (
-    <div className="flex flex-wrap items-center gap-6 px-4 py-4 border-t border-slate-200/40 dark:border-white/5 mt-auto">
+    <div className="flex flex-wrap items-center gap-8 px-6 py-6 border-t border-white/10 mt-auto">
       <LegendItem color="bg-accent-500 shadow-glow-indigo" label="Selected" />
-      <LegendItem color="bg-accent-100 dark:bg-accent-900/40" label="In range" />
+      <LegendItem color="bg-accent-500/20 border border-accent-500/40" label="Range Area" />
       <LegendItem
-        color="ring-2 ring-accent-500 bg-transparent animate-pulse"
+        color="ring-2 ring-accent-500 animate-pulse-ring"
         label="Today"
       />
-      <LegendItem color="bg-amber-400 shadow-glow-amber" label="Holiday" dot />
+      <LegendItem color="bg-amber-400" label="Holiday" dot />
       <LegendItem color="text-rose-500" label="Weekend" text />
     </div>
   );
@@ -321,15 +375,15 @@ function LegendItem({
   text?: boolean;
 }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-3 group">
       {dot ? (
-        <span className={cn("w-2.5 h-2.5 rounded-full", color)} />
+        <span className={cn("w-3 h-3 rounded-full shadow-lg", color)} />
       ) : text ? (
-        <span className={cn("text-xs font-bold", color)}>Sa</span>
+        <span className={cn("text-xs font-black tracking-tighter", color)}>7th</span>
       ) : (
-        <span className={cn("w-4 h-4 rounded-md", color)} />
+        <span className={cn("w-5 h-5 rounded-lg shadow-inner", color)} />
       )}
-      <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-widest">{label}</span>
+      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] group-hover:text-accent-500 transition-colors">{label}</span>
     </div>
   );
 }

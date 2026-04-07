@@ -2,10 +2,10 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Sun, Moon, ChevronLeft, ChevronRight, X, CalendarCheck } from "lucide-react";
+import { Sun, Moon, ChevronLeft, ChevronRight, X, CalendarCheck, Sparkles } from "lucide-react";
 import { cn } from "@/utils/cn";
 import { formatMonthYear, formatShortDate } from "@/utils/dateHelpers";
-import { isToday as dateFnsIsToday, isSameMonth } from "date-fns";
+import { isToday as dateFnsIsToday, isSameMonth, getDay } from "date-fns";
 import type { DateRange } from "@/hooks/useDateRange";
 
 interface HeaderProps {
@@ -31,111 +31,114 @@ export default function Header({
 }: HeaderProps) {
   const hasRange = range.start && range.end;
   const isCurrentMonth = isSameMonth(viewDate, new Date());
+  
+  // Week progress (1-7)
+  const today = new Date();
+  const dayOfWeek = getDay(today); // 0-6 (Sun-Sat)
+  const weekProgress = ((dayOfWeek + 1) / 7) * 100;
 
   return (
-    <div className="flex items-center justify-between px-6 py-4">
-      {/* Month navigation */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onPrev}
-          aria-label="Previous month"
-          className={cn(
-            "w-9 h-9 rounded-xl flex items-center justify-center",
-            "bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm",
-            "border border-white/40 dark:border-slate-600/40",
-            "text-slate-600 dark:text-slate-300",
-            "hover:bg-indigo-50 dark:hover:bg-indigo-900/40 hover:text-indigo-600 dark:hover:text-indigo-400",
-            "transition-all duration-200 shadow-sm hover:shadow-md active:scale-95"
-          )}
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </button>
-
-        <motion.div
-          key={viewDate.toISOString()}
-          initial={{ opacity: 0, y: -6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25 }}
-          className="text-center min-w-[160px]"
-        >
-          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight font-display">
-            {formatMonthYear(viewDate)}
-          </h2>
-        </motion.div>
-
-        <button
-          onClick={onNext}
-          aria-label="Next month"
-          className={cn(
-            "w-9 h-9 rounded-xl flex items-center justify-center",
-            "bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm",
-            "border border-white/40 dark:border-slate-600/40",
-            "text-slate-600 dark:text-slate-300",
-            "hover:bg-indigo-50 dark:hover:bg-indigo-900/40 hover:text-indigo-600 dark:hover:text-indigo-400",
-            "transition-all duration-200 shadow-sm hover:shadow-md active:scale-95"
-          )}
-        >
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      </div>
-
-      {/* Right side: range badge + today + dark toggle */}
-      <div className="flex items-center gap-2">
-        {hasRange && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-100 dark:bg-indigo-900/50 border border-indigo-200 dark:border-indigo-700/50"
-          >
-            <span className="text-xs font-medium text-indigo-700 dark:text-indigo-300">
-              {formatShortDate(range.start!)} → {formatShortDate(range.end!)}
-            </span>
-            <button
-              onClick={onClearRange}
-              aria-label="Clear date range"
-              className="text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-200 transition-colors"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </motion.div>
-        )}
-
-        {/* Jump to today — only shown when not on current month */}
-        {!isCurrentMonth && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            onClick={onToday}
-            aria-label="Jump to today (T)"
-            title="Jump to today (T)"
+    <div className="flex flex-col gap-6 px-4 py-4 mb-4">
+      <div className="flex items-center justify-between">
+        {/* Month navigation */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onPrev}
+            aria-label="Previous month"
             className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold",
-              "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400",
-              "border border-emerald-200 dark:border-emerald-700/50",
-              "hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-all duration-200 active:scale-95"
+              "w-11 h-11 rounded-2xl flex items-center justify-center",
+              "bg-white/10 dark:bg-slate-800/20 backdrop-blur-xl",
+              "border border-white/20 dark:border-white/5",
+              "text-slate-600 dark:text-slate-300 shadow-xl",
+              "hover:bg-accent-500 hover:text-white hover:border-transparent",
+              "transition-all duration-500 active:scale-90"
             )}
           >
-            <CalendarCheck className="w-3.5 h-3.5" />
-            Today
-          </motion.button>
-        )}
+            <ChevronLeft className="w-5 h-5" />
+          </button>
 
-        <button
-          onClick={onToggleDark}
-          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-          className={cn(
-            "w-9 h-9 rounded-xl flex items-center justify-center",
-            "bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm",
-            "border border-white/40 dark:border-slate-600/40",
-            "text-amber-500 dark:text-indigo-300",
-            "hover:bg-amber-50 dark:hover:bg-indigo-900/40",
-            "transition-all duration-200 shadow-sm hover:shadow-md active:scale-95"
+          <motion.div
+            key={viewDate.toISOString()}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="text-center min-w-[200px]"
+          >
+            <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter font-display">
+              {formatMonthYear(viewDate)}
+            </h2>
+          </motion.div>
+
+          <button
+            onClick={onNext}
+            aria-label="Next month"
+            className={cn(
+              "w-11 h-11 rounded-2xl flex items-center justify-center",
+              "bg-white/10 dark:bg-slate-800/20 backdrop-blur-xl",
+              "border border-white/20 dark:border-white/5",
+              "text-slate-600 dark:text-slate-300 shadow-xl",
+              "hover:bg-accent-500 hover:text-white hover:border-transparent",
+              "transition-all duration-500 active:scale-90"
+            )}
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Right side: range badge + today + dark toggle */}
+        <div className="flex items-center gap-3">
+          {hasRange && (
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className="flex items-center gap-3 px-4 py-2 rounded-2xl bg-accent-500 text-white shadow-xl shadow-accent-500/20 border border-white/20"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span className="text-xs font-black uppercase tracking-widest">
+                {formatShortDate(range.start!)} — {formatShortDate(range.end!)}
+              </span>
+              <button
+                onClick={onClearRange}
+                className="hover:rotate-90 transition-transform p-1"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </motion.div>
           )}
-        >
-          {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-        </button>
+
+          {!isCurrentMonth && (
+            <button
+              onClick={onToday}
+              className="px-5 py-2.5 rounded-2xl bg-white dark:bg-slate-800 shadow-xl border border-white/40 dark:border-white/5 text-xs font-black uppercase tracking-widest text-accent-500 hover:bg-accent-500 hover:text-white transition-all duration-300"
+            >
+              Current
+            </button>
+          )}
+
+          <button
+            onClick={onToggleDark}
+            className="w-11 h-11 rounded-2xl flex items-center justify-center bg-white/10 dark:bg-slate-800/20 backdrop-blur-xl border border-white/20 dark:border-white/5 shadow-xl transition-all hover:scale-110 active:scale-90"
+          >
+            {isDark ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-indigo-500" />}
+          </button>
+        </div>
       </div>
+
+      {/* Week Progress Indicator */}
+      {isCurrentMonth && (
+        <div className="relative h-1.5 w-full bg-slate-200/50 dark:bg-slate-800/30 rounded-full overflow-hidden">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${weekProgress}%` }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            className="absolute inset-y-0 left-0 bg-gradient-to-r from-accent-400 to-accent-600 rounded-full shadow-[0_0_10px_rgba(99,102,241,0.5)]"
+          />
+          <span className="absolute right-0 top-[-20px] text-[9px] font-black text-slate-400 uppercase tracking-widest">
+            Week Progress: {Math.round(weekProgress)}%
+          </span>
+        </div>
+      )}
     </div>
   );
 }

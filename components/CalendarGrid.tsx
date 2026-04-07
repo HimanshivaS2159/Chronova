@@ -1,7 +1,5 @@
-"use client";
-
 import React, { useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, MotionValue } from "framer-motion";
 import DayCell from "./DayCell";
 import { buildCalendarWeeks } from "@/utils/dateHelpers";
 import type { DateRange } from "@/hooks/useDateRange";
@@ -16,6 +14,8 @@ interface CalendarGridProps {
   onHover: (date: Date | null) => void;
   direction: number;
   isLoading?: boolean;
+  mouseX: MotionValue<number>;
+  mouseY: MotionValue<number>;
 }
 
 const SkeletonCell = () => (
@@ -32,6 +32,8 @@ export default function CalendarGrid({
   onHover,
   direction,
   isLoading,
+  mouseX,
+  mouseY,
 }: CalendarGridProps) {
   const weeks = useMemo(() => buildCalendarWeeks(viewDate), [viewDate]);
 
@@ -51,7 +53,7 @@ export default function CalendarGrid({
       filter: "blur(0px)",
       transition: {
         duration: 0.6,
-        ease: [0.16, 1, 0.3, 1], // Custom cubic-bezier for smooth inertia
+        ease: [0.16, 1, 0.3, 1],
       },
     },
     exit: (dir: number) => ({
@@ -71,7 +73,7 @@ export default function CalendarGrid({
     <div className="w-full relative min-h-[400px]">
       {/* Weekday headers */}
       <div className="grid grid-cols-[3rem_repeat(7,1fr)] mb-4 lg:mb-6">
-        <div /> {/* Week number column spacer */}
+        <div /> 
         {WEEKDAYS.map((d) => (
           <div
             key={d}
@@ -105,7 +107,6 @@ export default function CalendarGrid({
               ))
             : weeks.map((week) => (
                 <div key={week.weekNumber} className="grid grid-cols-[3rem_repeat(7,1fr)] mb-1">
-                  {/* Week number column */}
                   <div className="flex items-center justify-center opacity-40">
                     <span className="text-[10px] font-bold text-slate-400 dark:text-slate-600 tabular-nums">
                       {week.weekNumber}
@@ -120,6 +121,8 @@ export default function CalendarGrid({
                       hoverDate={hoverDate}
                       onSelect={onSelect}
                       onHover={onHover}
+                      mouseX={mouseX}
+                      mouseY={mouseY}
                     />
                   ))}
                 </div>

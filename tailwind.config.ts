@@ -35,9 +35,25 @@ const config: Config = {
         ripple: "ripple 0.6s ease-out",
         todayPulse: "todayPulse 2s ease-in-out infinite",
         float: "float 6s ease-in-out infinite",
+        "float-slow": "floatSlow 8s ease-in-out infinite",
         "glow-pulse": "glowPulse 2s ease-in-out infinite",
+        "cinematic-zoom": "cinematicZoom 20s ease-in-out infinite alternate",
+        "pulse-ring": "pulseRing 1.25s cubic-bezier(0.215, 0.61, 0.355, 1) infinite",
       },
       keyframes: {
+        cinematicZoom: {
+          "0%": { transform: "scale(1)" },
+          "100%": { transform: "scale(1.08)" },
+        },
+        floatSlow: {
+          "0%, 100%": { transform: "translate(0, 0)" },
+          "33%": { transform: "translate(5px, -15px)" },
+          "66%": { transform: "translate(-8px, 10px)" },
+        },
+        pulseRing: {
+          "0%": { transform: "scale(0.33)" },
+          "80%, 100%": { opacity: "0" },
+        },
         pageFlip: {
           "0%": { transform: "rotateX(0deg)", opacity: "1" },
           "50%": { transform: "rotateX(-90deg)", opacity: "0" },
@@ -61,8 +77,8 @@ const config: Config = {
           "100%": { transform: "scale(2.5)", opacity: "0" },
         },
         todayPulse: {
-          "0%, 100%": { boxShadow: "0 0 0 0 rgba(99,102,241,0.4)" },
-          "50%": { boxShadow: "0 0 0 6px rgba(99,102,241,0)" },
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(var(--accent-rgb), 0.4)" },
+          "50%": { boxShadow: "0 0 0 10px rgba(var(--accent-rgb), 0)" },
         },
         float: {
           "0%, 100%": { transform: "translateY(0px)" },
@@ -70,7 +86,7 @@ const config: Config = {
         },
         glowPulse: {
           "0%, 100%": { opacity: "1", filter: "brightness(1)" },
-          "50%": { opacity: "0.8", filter: "brightness(1.2)" },
+          "50%": { opacity: "0.8", filter: "brightness(1.4)" },
         },
       },
       backdropBlur: {
@@ -82,11 +98,12 @@ const config: Config = {
         "calendar-dark":
           "0 25px 60px -12px rgba(0,0,0,0.6), 0 8px 20px -8px rgba(0,0,0,0.4)",
         day: "0 2px 8px rgba(0,0,0,0.08)",
-        "day-hover": "0 4px 16px rgba(99,102,241,0.3)",
+        "day-hover": "0 4px 16px rgba(var(--accent-rgb), 0.3)",
         glass: "inset 0 1px 0 rgba(255,255,255,0.15)",
         "glow-indigo": "0 0 15px rgba(99, 102, 241, 0.4)",
         "glow-amber": "0 0 15px rgba(245, 158, 11, 0.4)",
         "premium-lg": "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
+        "ultra-glass": "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
       },
     },
   },
