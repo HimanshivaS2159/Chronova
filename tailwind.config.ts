@@ -34,6 +34,8 @@ const config: Config = {
         shimmer: "shimmer 1.5s infinite",
         ripple: "ripple 0.6s ease-out",
         todayPulse: "todayPulse 2s ease-in-out infinite",
+        float: "float 6s ease-in-out infinite",
+        "glow-pulse": "glowPulse 2s ease-in-out infinite",
       },
       keyframes: {
         pageFlip: {
@@ -62,6 +64,14 @@ const config: Config = {
           "0%, 100%": { boxShadow: "0 0 0 0 rgba(99,102,241,0.4)" },
           "50%": { boxShadow: "0 0 0 6px rgba(99,102,241,0)" },
         },
+        float: {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+        glowPulse: {
+          "0%, 100%": { opacity: "1", filter: "brightness(1)" },
+          "50%": { opacity: "0.8", filter: "brightness(1.2)" },
+        },
       },
       backdropBlur: {
         xs: "2px",
@@ -74,6 +84,9 @@ const config: Config = {
         day: "0 2px 8px rgba(0,0,0,0.08)",
         "day-hover": "0 4px 16px rgba(99,102,241,0.3)",
         glass: "inset 0 1px 0 rgba(255,255,255,0.15)",
+        "glow-indigo": "0 0 15px rgba(99, 102, 241, 0.4)",
+        "glow-amber": "0 0 15px rgba(245, 158, 11, 0.4)",
+        "premium-lg": "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
       },
     },
   },

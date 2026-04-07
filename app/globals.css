@@ -70,23 +70,42 @@ html {
 /* Glass card utility */
 @layer components {
   .glass-card {
-    @apply bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/40 dark:border-slate-700/40;
+    @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl border border-white/50 dark:border-slate-700/50 shadow-calendar dark:shadow-calendar-dark;
   }
 
+  .glass-tag {
+    @apply bg-white/20 dark:bg-slate-800/20 backdrop-blur-md border border-white/30 dark:border-slate-700/30 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-white/90 shadow-sm;
+  }
+
+  .btn-premium {
+    @apply rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-300
+      bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg hover:shadow-indigo-500/25
+      hover:-translate-y-0.5 active:scale-95;
+  }
+  
   .btn-ghost {
     @apply rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200
       hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95;
   }
 }
 
+/* Custom Cursor Glow */
+.cursor-glow {
+  background: radial-gradient(600px circle at var(--x) var(--y), rgba(99, 102, 241, 0.08), transparent 40%);
+}
+
+.dark .cursor-glow {
+  background: radial-gradient(600px circle at var(--x) var(--y), rgba(99, 102, 241, 0.12), transparent 40%);
+}
+
 /* Selection color */
 ::selection {
-  background: rgba(99, 102, 241, 0.2);
+  background: rgba(99, 102, 241, 0.3);
   color: inherit;
 }
 
-/* Focus ring override */
-*:focus-visible {
-  outline: 2px solid rgba(99, 102, 241, 0.6);
-  outline-offset: 2px;
-}
+/* Tooltip transition */
+.tooltip-enter { opacity: 0; transform: translateY(5px); }
+.tooltip-enter-active { opacity: 1; transform: translateY(0); transition: all 200ms ease-out; }
+.tooltip-exit { opacity: 1; transform: translateY(0); }
+.tooltip-exit-active { opacity: 0; transform: translateY(5px); transition: all 150ms ease-in; }
